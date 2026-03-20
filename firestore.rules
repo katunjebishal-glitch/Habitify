@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+    function isRequestOwner() {
+      return isAuthenticated() && request.auth.uid == request.resource.data.userId;
+    }
+    function isValidString(val, maxLen) {
+      return val is string && val.size() <= maxLen;
+    }
+    function isValidNumber(val, min, max) {
+      return val is number && val >= min && val <= max;
+    }
+
+    // User Rules
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && 
+        request.resource.data.keys().hasAll(['uid', 'email']) &&
+        request.resource.data.uid == request.auth.uid;
+      allow update: if isOwner(userId);
+    }
+
+    // Habit Rules
+    match /habits/{habitId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && isRequestOwner() &&
+        isValidString(request.resource.data.name, 100);
+      allow update: if isAuthenticated() && isDocOwner() && isRequestOwner();
+      allow delete: if isAuthenticated() && isDocOwner();
+    }
+
+    // Log Rules
+    match /logs/{logId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && isRequestOwner();
+      allow update: if isAuthenticated() && isDocOwner() && isRequestOwner();
+      allow delete: if isAuthenticated() && isDocOwner();
+    }
+
+    // Daily Score Rules
+    match /dailyScores/{scoreId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && isRequestOwner();
+      allow update: if isAuthenticated() && isDocOwner() && isRequestOwner();
+    }
+  }
+}

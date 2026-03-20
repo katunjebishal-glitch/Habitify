@@ -1,0 +1,102 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Stores user settings and profile information.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "settings": {
+          "type": "object",
+          "properties": {
+            "theme": { "type": "string", "enum": ["light", "dark"] },
+            "notifications": { "type": "boolean" },
+            "emailAlerts": { "type": "boolean" },
+            "dailyGoalThreshold": { "type": "number" },
+            "language": { "type": "string" },
+            "mobileUsageLimit": { "type": "number" },
+            "mobileUsagePenalty": { "type": "number" },
+            "mobileUsagePenaltyInterval": { "type": "number" }
+          }
+        },
+        "stats": {
+          "type": "object",
+          "properties": {
+            "points": { "type": "number" },
+            "level": { "type": "number" },
+            "bestStreak": { "type": "number" }
+          }
+        }
+      },
+      "required": ["uid", "email"]
+    },
+    "Habit": {
+      "title": "Habit Definition",
+      "description": "Defines a habit to be tracked.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["positive", "negative"] },
+        "target": { "type": "number" },
+        "unit": { "type": "string" },
+        "weight": { "type": "number" },
+        "penalty": { "type": "number" },
+        "emoji": { "type": "string" },
+        "description": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "isActive": { "type": "boolean" }
+      },
+      "required": ["userId", "name", "type", "weight"]
+    },
+    "Log": {
+      "title": "Habit Log",
+      "description": "Daily log entry for a specific habit.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "habitId": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "value": { "type": "number" },
+        "note": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "habitId", "date", "value"]
+    },
+    "DailyScore": {
+      "title": "Daily Score",
+      "description": "Calculated daily performance score.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "score": { "type": "number" },
+        "points": { "type": "number" }
+      },
+      "required": ["userId", "date", "score"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile and settings."
+    },
+    "/habits/{habitId}": {
+      "schema": "Habit",
+      "description": "Habit definitions."
+    },
+    "/logs/{logId}": {
+      "schema": "Log",
+      "description": "Daily habit logs."
+    },
+    "/dailyScores/{scoreId}": {
+      "schema": "DailyScore",
+      "description": "Daily performance scores."
+    }
+  }
+}
